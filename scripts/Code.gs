@@ -1,5 +1,11 @@
-const EDIT_PASSWORD = "snow1234";
-const SPREADSHEET_ID = "1E3snSo7vzpdcTLkRqJFDlgDK3GZ3IuJYehspN95AgvQ";
+// ============================================
+// 同盟マップ管理用GASスクリプト (マルチテナント対応版)
+// ============================================
+// このスクリプトは、各同盟専用のスプレッドシートにデプロイしてください
+// 
+// 注意: EDIT_PASSWORD と SPREADSHEET_ID は削除されました
+// パスワード認証はマスタースプレッドシート側で行います
+// このスクリプトはスプレッドシートIDをリクエストから受け取ります
 
 // マップ設定のデフォルト
 const DEFAULT_MAPS = [
@@ -46,10 +52,26 @@ function getMapConfigs() {
 
 function doGet(e) {
   const action = e.parameter.action;
+  const spreadsheetId = e.parameter.spreadsheetId;
+  
+  // スプレッドシートIDが必須
+  if (!spreadsheetId) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      ok: false, 
+      error: 'spreadsheetId is required' 
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  try {
+    const ss = SpreadsheetApp.openById(spreadsheetId);
+  
+  try {
+    const ss = SpreadsheetApp.openById(spreadsheetId);
   
   // マップ一覧を取得
   if (action === 'getMaps') {
-    const configs = getMapConfigs();
+    const configs = getMapConfigs(ss);
     return ContentService.createTextOutput(JSON.stringify({ 
       ok: true, 
       maps: configs 
@@ -59,7 +81,6 @@ function doGet(e) {
   
   if (action === 'getMap') {
     const mapId = e.parameter.mapId || 'object';
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const metaSheet = ss.getSheetByName('meta');
     
     // マップ設定を取得
@@ -131,8 +152,8 @@ function doGet(e) {
         // ベースマップの場合のみ追加フィールド
         if (mapConfig.isBase) {
           obj.birthday = objectsData[i][7] || '';
-          obj.note = objectsData[i][8] || '';
-          obj.isFavorite = objectsData[i][11] || false;
+          obj.memo = objectsData[i][8] || '';
+          obj.favorite = objectsData[i][11] || false;
           obj.Animation = objectsData[i][12] || '';
           obj.Fire = objectsData[i][13] || '';
         }
@@ -192,18 +213,19 @@ function doPost(e) {
   
   // マップ設定を更新
   if (action === 'updateMapConfig') {
-    const data = JSON.parse(e.postData.contents);
+    const spreadsheetId = e.parameter.spreadsheetId;
     
-    // パスワード認証
-    if (data.password !== EDIT_PASSWORD) {
+    if (!spreadsheetId) {
       return ContentService.createTextOutput(JSON.stringify({ 
         ok: false, 
-        error: 'Invalid password' 
+        error: 'spreadsheetId is required' 
       }))
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const data = JSON.parse(e.postData.contents);
+    
+    const ss = SpreadsheetApp.openById(spreadsheetId);
     const configSheet = ss.getSheetByName('map_config');
     
     if (!configSheet) {
@@ -225,6 +247,9 @@ function doPost(e) {
         if (data.isVisible !== undefined && !configData[i][4]) {  // ベースマップでない場合のみ
           configSheet.getRange(i + 1, 4).setValue(data.isVisible);
         }
+        if (data.order !== undefined) {
+          configSheet.getRange(i + 1, 6).setValue(data.order);
+        }
         
         return ContentService.createTextOutput(JSON.stringify({ 
           ok: true
@@ -240,22 +265,77 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
   
-  // マップをコピー
-  if (action === 'copyMap') {
-    const data = JSON.parse(e.postData.contents);
+  // マップ設定を一括更新（並び替え用）
+  if (action === 'updateAllMapConfigs') {
+    const spreadsheetId = e.parameter.spreadsheetId;
     
-    // パスワード認証
-    if (data.password !== EDIT_PASSWORD) {
+    if (!spreadsheetId) {
       return ContentService.createTextOutput(JSON.stringify({ 
         ok: false, 
-        error: 'Invalid password' 
+        error: 'spreadsheetId is required' 
       }))
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const data = JSON.parse(e.postData.contents);
+    
+    const ss = SpreadsheetApp.openById(spreadsheetId);
+    const configSheet = ss.getSheetByName('map_config');
+    
+    if (!configSheet) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Config sheet not found' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // 全マップの設定を更新
+    const configData = configSheet.getDataRange().getValues();
+    
+    for (const update of data.maps) {
+      for (let i = 1; i < configData.length; i++) {
+        if (configData[i][0] === update.id) {
+          if (update.name !== undefined) {
+            configSheet.getRange(i + 1, 2).setValue(update.name);
+          }
+          if (update.isVisible !== undefined && !configData[i][4]) {
+            configSheet.getRange(i + 1, 4).setValue(update.isVisible);
+          }
+          if (update.order !== undefined) {
+            configSheet.getRange(i + 1, 6).setValue(update.order);
+          }
+          break;
+        }
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      ok: true
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // マップをコピー
+  if (action === 'copyMap') {
+    const spreadsheetId = e.parameter.spreadsheetId;
+    
+    if (!spreadsheetId) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'spreadsheetId is required' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = JSON.parse(e.postData.contents);
+    
+    // パスワード認証はフロントエンド側で行うため削除
+    // （マスター管理システムで既に認証済み）
+    
+    const ss = SpreadsheetApp.openById(spreadsheetId);
     const sourceSheet = ss.getSheetByName('objects');  // ベースマップ
-    const configs = getMapConfigs();
+    const configs = getMapConfigs(ss);
     const targetConfig = configs.find(m => m.id === data.targetMapId);
     
     if (!targetConfig || targetConfig.isBase) {
@@ -341,7 +421,7 @@ function doPost(e) {
     if (!objectsSheet) {
       objectsSheet = ss.insertSheet(mapConfig.sheetName);
       if (mapConfig.isBase) {
-        objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h', 'birthday', 'note', 'updatedAt', 'updatedBy', 'isFavorite', 'Animation', 'Fire']);
+        objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h', 'birthday', 'memo', 'updatedAt', 'updatedBy', 'favorite', 'Animation', 'Fire']);
       } else {
         objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h']);
       }
@@ -411,10 +491,10 @@ function doPost(e) {
           obj.w, 
           obj.h, 
           obj.birthday || '',
-          obj.note || '',
+          obj.memo || '',
           timestamp,
           actor,
-          obj.isFavorite || false,
+          obj.favorite || false,
           obj.Animation || '',
           obj.Fire || ''
         ]);

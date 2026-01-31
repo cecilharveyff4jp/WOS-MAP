@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  basePath: isProd ? '/SNW_Home' : '',
+  output: isProd ? 'export' : undefined,
+  basePath: isProd ? '/WOS-MAP' : '',
   images: {
     unoptimized: true,
   },
