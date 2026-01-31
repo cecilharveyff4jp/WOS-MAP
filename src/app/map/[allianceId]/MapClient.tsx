@@ -924,6 +924,49 @@ export default function MapViewerPage() {
       }
     }
 
+    // +マーク描画（編集モード時のpendingPosition）
+    // ※カメラ変換が適用されている状態で描画
+    if (isEditMode && pendingPosition) {
+      // オブジェクトと同じ座標計算方法を使用
+      const gx = pendingPosition.x * cfg.cell;
+      const gy = pendingPosition.y * cfg.cell;
+      // 1x1セルの中心に+マークを配置
+      const centerX = gx + cfg.cell / 2;
+      const centerY = gy + cfg.cell / 2;
+      
+      ctx.save();
+      // +マークの中心に移動
+      ctx.translate(centerX, centerY);
+      // 回転を打ち消して、画面上で水平垂直の+として表示
+      ctx.rotate(-LOOK.angle);
+      
+      // 白い縁取り（視認性向上）
+      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(12, 0);
+      ctx.moveTo(0, -12);
+      ctx.lineTo(0, 12);
+      ctx.stroke();
+      
+      // 赤い+マーク本体
+      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = "#ef4444";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(12, 0);
+      ctx.moveTo(0, -12);
+      ctx.lineTo(0, 12);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
     ctx.restore();
 
     // 吹き出しを一番上のレイヤーに描画（選択されたオブジェクトにbirthdayまたはnoteがある場合）
@@ -1059,51 +1102,6 @@ export default function MapViewerPage() {
         ctx.restore();
       }
     }
-
-    // +マーク描画（編集モード時のpendingPosition）
-    // ※カメラ変換が適用されている状態で描画
-    if (isEditMode && pendingPosition) {
-      // オブジェクトと同じ座標計算方法を使用
-      const gx = pendingPosition.x * cfg.cell;
-      const gy = pendingPosition.y * cfg.cell;
-      // 1x1セルの中心に+マークを配置
-      const centerX = gx + cfg.cell / 2;
-      const centerY = gy + cfg.cell / 2;
-      
-      ctx.save();
-      // +マークの中心に移動
-      ctx.translate(centerX, centerY);
-      // 回転を打ち消して、画面上で水平垂直の+として表示
-      ctx.rotate(-LOOK.angle);
-      
-      // 白い縁取り（視認性向上）
-      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(-12, 0);
-      ctx.lineTo(12, 0);
-      ctx.moveTo(0, -12);
-      ctx.lineTo(0, 12);
-      ctx.stroke();
-      
-      // 赤い+マーク本体
-      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = "#ef4444";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-12, 0);
-      ctx.lineTo(12, 0);
-      ctx.moveTo(0, -12);
-      ctx.lineTo(0, 12);
-      ctx.stroke();
-      
-      ctx.restore();
-    }
-
-    ctx.restore();
 
     // HUD（選択オブジェクト情報を含む）
     ctx.fillStyle = "rgba(0,0,0,0.55)";
@@ -1377,6 +1375,7 @@ export default function MapViewerPage() {
       clickTimerRef.current = setTimeout(() => {
         setPendingPosition({ x: gridX, y: gridY });
         setSelectedId(null);
+        setEditingObject(null); // モーダルを閉じて+マークを表示
         clickTimerRef.current = null;
       }, 250); // 250ms遅延
       return;
@@ -1724,7 +1723,7 @@ export default function MapViewerPage() {
             <span style={{
               fontSize: isMobile ? 11 : 13,
               fontWeight: 500,
-              color: "#333",
+              color: "#1f2937",
               whiteSpace: "nowrap",
             }}>
               テロップ
@@ -1793,6 +1792,43 @@ export default function MapViewerPage() {
         ) : (
           <>
             <button
+              onClick={() => {
+                // +マークがある位置に新規施設を作成
+                if (pendingPosition) {
+                  const newId = `obj_${Date.now()}`;
+                  const newType = lastCreatedType;
+                  const defaultSize = getDefaultSize(newType);
+                  const newObj: Obj = {
+                    id: newId,
+                    type: newType,
+                    label: getDefaultLabel(newType),
+                    x: pendingPosition.x,
+                    y: pendingPosition.y,
+                    w: defaultSize.w,
+                    h: defaultSize.h,
+                  };
+                  setEditingObject(newObj);
+                  setOriginalEditingId(newId);
+                } else {
+                  alert('マップ上をクリックして位置を指定してください');
+                }
+              }}
+              style={{
+                padding: "8px 12px",
+                background: pendingPosition ? "#f59e0b" : "#d1d5db",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                cursor: pendingPosition ? "pointer" : "not-allowed",
+                fontSize: "14px",
+                flexShrink: 0,
+              }}
+              disabled={!pendingPosition}
+              title={pendingPosition ? "＋マーク位置に新規施設を作成" : "マップ上をクリックして位置を指定"}
+            >
+              ➕
+            </button>
+            <button
               onClick={saveToGAS}
               disabled={isSaving}
               style={{
@@ -1857,7 +1893,7 @@ export default function MapViewerPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 style={{ margin: "0 0 16px 0" }}>編集モード認証</h2>
-            <p style={{ margin: "0 0 12px 0", fontSize: 14, color: "#666" }}>
+            <p style={{ margin: "0 0 12px 0", fontSize: 14, color: "#374151" }}>
               パスワードを入力してください
             </p>
             <input
@@ -2920,12 +2956,18 @@ export default function MapViewerPage() {
                   if (newType === "FLAG") newLabel = "🚩";
                   else if (newType === "MOUNTAIN") newLabel = "🏔️";
                   else if (newType === "LAKE") newLabel = "🌊";
+                  
+                  // 基準値があるタイプのリスト
+                  const typesWithDefaultSize = ["HQ", "CITY", "BEAR_TRAP", "STATUE", "DEPOT", "FLAG", "MOUNTAIN", "LAKE"];
+                  const hasDefaultSize = typesWithDefaultSize.includes(newType.toUpperCase());
+                  
                   setEditingObject({ 
                     ...editingObject, 
                     type: newType,
                     label: newLabel,
-                    w: defaultSize.w,
-                    h: defaultSize.h,
+                    // 基準値があるものは基準値に変更、ないものは現在のサイズを維持
+                    w: hasDefaultSize ? defaultSize.w : (editingObject.w || 2),
+                    h: hasDefaultSize ? defaultSize.h : (editingObject.h || 2),
                   });
                 }}
                 style={{

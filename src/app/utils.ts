@@ -47,12 +47,14 @@ export function getDefaultSize(type: string): { w: number; h: number } {
       return { w: 4, h: 4 };
     case "CITY":
       return { w: 2, h: 2 };
-    case "FLAG":
-      return { w: 1, h: 1 };
+    case "BEAR_TRAP":
+      return { w: 2, h: 2 };
     case "STATUE":
       return { w: 2, h: 2 };
     case "DEPOT":
       return { w: 2, h: 2 };
+    case "FLAG":
+      return { w: 1, h: 1 };
     case "MOUNTAIN":
       return { w: 1, h: 1 };
     case "LAKE":
