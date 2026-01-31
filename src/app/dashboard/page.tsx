@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserAlliances } from '../lib/api';
-import type { Alliance } from '../types/alliance';
+import type { Alliance } from '../types';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export default function DashboardPage() {

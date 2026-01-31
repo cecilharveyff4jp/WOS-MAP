@@ -36,6 +36,7 @@ export type Obj = {
   y?: number;
   w?: number;
   h?: number;
+  icon?: string;
   birthday?: string;
   isFavorite?: boolean;
   note?: string;
@@ -96,14 +97,6 @@ export type CreateAllianceRequest = {
   userId: string;              // Google UID
   allianceName: string;
   serverNumber: string;
-  editPassword?: string;       // オプション（設定しない場合もある）olean;  // 編集権限の有無
-  expiresAt: number;           // セッション有効期限（タイムスタンプ）
-};
-
-export type CreateAllianceRequest = {
-  allianceName: string;
-  serverNumber: string;
-  ownerEmail: string;
   editPassword: string;
 };
 
@@ -132,7 +125,8 @@ export type GetAllianceRequest = {
 export type GetAllianceResponse = {
   ok: boolean;
   alliance?: Alliance;
-  
+  error?: string;
+};
 
 // ユーザーの同盟一覧取得レスポンス
 export type GetUserAlliancesResponse = {
@@ -156,5 +150,4 @@ export type UpdateAllianceRequest = {
   allianceName?: string;
   serverNumber?: string;
   editPassword?: string;       // 新しいパスワード（オプション）
-};error?: string;
 };

@@ -3,8 +3,7 @@ import type { NextConfig } from "next";
 const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
-  output: isProd ? 'export' : undefined,
-  basePath: isProd ? '/WOS-MAP' : '',
+  // Vercelでは静的エクスポート不要（動的ルートをサポート）
   images: {
     unoptimized: true,
   },
@@ -14,8 +13,7 @@ const nextConfig: NextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  // Turbopack設定（Next.js 16デフォルト）
-  // 空の設定でTurbopackを有効化し、デフォルトの最適化を使用
+  // Turbopack設定(Next.js 16デフォルト)
   turbopack: {},
 };
 

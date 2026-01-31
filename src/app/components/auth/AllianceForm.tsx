@@ -12,7 +12,7 @@ export default function AllianceForm({ onSubmit, isSubmitting = false }: Allianc
   const [formData, setFormData] = useState<CreateAllianceRequest>({
     allianceName: '',
     serverNumber: '',
-    ownerEmail: '',
+    userId: '',
     editPassword: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -28,10 +28,8 @@ export default function AllianceForm({ onSubmit, isSubmitting = false }: Allianc
       newErrors.serverNumber = 'サーバー番号を入力してください';
     }
 
-    if (!formData.ownerEmail.trim()) {
-      newErrors.ownerEmail = 'メールアドレスを入力してください';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.ownerEmail)) {
-      newErrors.ownerEmail = '有効なメールアドレスを入力してください';
+    if (!formData.userId.trim()) {
+      newErrors.userId = 'ユーザーIDが必要です';
     }
 
     if (!formData.editPassword) {
@@ -130,39 +128,35 @@ export default function AllianceForm({ onSubmit, isSubmitting = false }: Allianc
 
       <div style={{ marginBottom: '20px' }}>
         <label
-          htmlFor="ownerEmail"
+          htmlFor="userId"
           style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}
         >
-          責任者メールアドレス <span style={{ color: 'red' }}>*</span>
+          ユーザーID <span style={{ color: 'red' }}>*</span>
         </label>
         <input
-          id="ownerEmail"
-          type="email"
-          value={formData.ownerEmail}
-          onChange={(e) => handleChange('ownerEmail', e.target.value)}
+          id="userId"
+          type="text"
+          value={formData.userId}
+          onChange={(e) => handleChange('userId', e.target.value)}
           disabled={isSubmitting}
           style={{
             width: '100%',
             padding: '12px',
-            border: errors.ownerEmail ? '2px solid #dc3545' : '1px solid #ddd',
+            border: errors.userId ? '2px solid #dc3545' : '1px solid #ddd',
             borderRadius: '4px',
             fontSize: '14px',
             boxSizing: 'border-box',
           }}
-          placeholder="例: admin@example.com"
+          placeholder="自動入力されます"
         />
-        {errors.ownerEmail && (
+        {errors.userId && (
           <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '4px' }}>
-            {errors.ownerEmail}
+            {errors.userId}
           </div>
         )}
       </div>
 
       <div style={{ marginBottom: '20px' }}>
-        <label
-          htmlFor="editPassword"
-          style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}
-        >4px' }}>
         <label
           htmlFor="editPassword"
           style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}
@@ -192,7 +186,11 @@ export default function AllianceForm({ onSubmit, isSubmitting = false }: Allianc
         )}
         <div style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>
           ⚠️ このパスワードはマップ編集時に必要になります。必ずメモしておいてください。
-        </div>pe="submit"
+        </div>
+      </div>
+
+      <button
+        type="submit"
         disabled={isSubmitting}
         style={{
           width: '100%',

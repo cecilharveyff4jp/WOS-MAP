@@ -79,7 +79,7 @@ export default function NewAlliancePage() {
         allianceName: formData.allianceName.trim(),
         serverNumber: formData.serverNumber.trim(),
         editPassword: formData.editPassword.trim(),
-        googleId: user.googleId,
+        userId: user.userId,
       });
 
       router.push(`/map/${alliance.allianceId}`);
