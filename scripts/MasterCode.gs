@@ -571,7 +571,7 @@ function handleGetRequest(e) {
         });
       }
       
-      // パスワードが指定されている場合のみ検証（Google認証済みの場合は空）
+      // パスワードが空でない場合のみ検証
       if (password && !verifyAlliancePassword(allianceId, password)) {
         return createResponse({
           ok: false,
@@ -628,9 +628,15 @@ function handleGetRequest(e) {
         });
       }
       
-      // パスワード検証
-      const verified = verifyAlliancePassword(allianceId, password);
-      Logger.log('deleteAlliance: verified=' + verified);
+      // 'google-auth'の場合はパスワード検証をスキップ、それ以外は検証
+      let verified = false;
+      if (password === 'google-auth') {
+        verified = true;
+        Logger.log('deleteAlliance: google-auth bypass');
+      } else {
+        verified = verifyAlliancePassword(allianceId, password);
+        Logger.log('deleteAlliance: verified=' + verified);
+      }
       
       if (!verified) {
         return createResponse({
@@ -1072,7 +1078,7 @@ function handlePostRequest(e) {
         });
       }
       
-      // パスワードが指定されている場合のみ検証（Google認証済みの場合は空）
+      // パスワードが空でない場合のみ検証
       if (data.password && !verifyAlliancePassword(data.allianceId, data.password)) {
         return createResponse({
           ok: false,

@@ -51,6 +51,12 @@ export default function AllianceClient() {
           currentPassword: '',
           newPassword: '',
         });
+
+        // Google認証済みで、かつユーザーIDが一致する場合は自動的に認証状態にする
+        if (user && user.userId === response.alliance.userId) {
+          console.log('Auto-authenticated: User owns this alliance');
+          setIsAuthenticated(true);
+        }
       } catch (err) {
         setError('同盟情報の取得に失敗しました');
         console.error(err);
@@ -62,7 +68,7 @@ export default function AllianceClient() {
     if (allianceId) {
       fetchAlliance();
     }
-  }, [allianceId]);
+  }, [allianceId, user]);
 
   // パスワード認証
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -90,7 +96,9 @@ export default function AllianceClient() {
     
     if (!alliance) return;
     
-    if (!editForm.currentPassword) {
+    // Google認証済みで所有者の場合はパスワード不要、それ以外はパスワード必須
+    const isOwner = user && user.userId === alliance.userId;
+    if (!isOwner && !editForm.currentPassword) {
       alert('現在のパスワードを入力してください');
       return;
     }
@@ -98,11 +106,11 @@ export default function AllianceClient() {
     try {
       const result = await updateAlliance(
         allianceId,
-        editForm.currentPassword,
+        isOwner ? '' : editForm.currentPassword,  // 所有者の場合は空文字列
         {
-          allianceName: editForm.allianceName.trim(),
-          serverNumber: editForm.serverNumber.trim(),
-          newPassword: editForm.newPassword.trim() || undefined,
+          allianceName: String(editForm.allianceName || '').trim(),
+          serverNumber: String(editForm.serverNumber || '').trim(),
+          newPassword: String(editForm.newPassword || '').trim() || undefined,
         }
       );
 
@@ -137,13 +145,15 @@ export default function AllianceClient() {
       return;
     }
     
-    if (!deletePassword) {
+    // Google認証済みで所有者の場合はパスワード不要、それ以外はパスワード必須
+    const isOwner = user && user.userId === alliance.userId;
+    if (!isOwner && !deletePassword) {
       alert('パスワードを入力してください');
       return;
     }
 
     try {
-      const result = await deleteAlliance(allianceId, deletePassword);
+      const result = await deleteAlliance(allianceId, isOwner ? 'google-auth' : deletePassword);
       
       if (result.ok) {
         alert('同盟を削除しました');
@@ -549,25 +559,27 @@ export default function AllianceClient() {
                 />
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
-                  現在のパスワード（必須）
-                </label>
-                <input
-                  type="password"
-                  value={editForm.currentPassword}
-                  onChange={(e) => setEditForm({ ...editForm, currentPassword: e.target.value })}
-                  placeholder="更新には必須です"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    fontSize: '16px'
-                  }}
-                  required
-                />
-              </div>
+              {!(user && alliance && user.userId === alliance.userId) && (
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
+                    現在のパスワード(必須)
+                  </label>
+                  <input
+                    type="password"
+                    value={editForm.currentPassword}
+                    onChange={(e) => setEditForm({ ...editForm, currentPassword: e.target.value })}
+                    placeholder="更新には必須です"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '16px'
+                    }}
+                    required
+                  />
+                </div>
+              )}
 
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
@@ -670,37 +682,41 @@ export default function AllianceClient() {
                   marginBottom: '16px'
                 }}
               />
-              <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
-                パスワード
-              </label>
-              <input
-                type="password"
-                value={deletePassword}
-                onChange={(e) => setDeletePassword(e.target.value)}
-                placeholder="編集用パスワード"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '16px'
-                }}
-              />
+              {!(user && alliance && user.userId === alliance.userId) && (
+                <>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
+                    パスワード
+                  </label>
+                  <input
+                    type="password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder="編集用パスワード"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '16px'
+                    }}
+                  />
+                </>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={handleDelete}
-                disabled={deleteConfirmText !== alliance.allianceName || !deletePassword}
+                disabled={deleteConfirmText !== alliance.allianceName || (!(user && user.userId === alliance.userId) && !deletePassword)}
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: (deleteConfirmText === alliance.allianceName && deletePassword) ? '#ef4444' : '#e5e7eb',
-                  color: (deleteConfirmText === alliance.allianceName && deletePassword) ? 'white' : '#9ca3af',
+                  background: (deleteConfirmText === alliance.allianceName && ((user && user.userId === alliance.userId) || deletePassword)) ? '#ef4444' : '#e5e7eb',
+                  color: (deleteConfirmText === alliance.allianceName && ((user && user.userId === alliance.userId) || deletePassword)) ? 'white' : '#9ca3af',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  cursor: (deleteConfirmText === alliance.allianceName && deletePassword) ? 'pointer' : 'not-allowed'
+                  cursor: (deleteConfirmText === alliance.allianceName && ((user && user.userId === alliance.userId) || deletePassword)) ? 'pointer' : 'not-allowed'
                 }}
               >
                 削除する
@@ -748,43 +764,161 @@ export default function AllianceClient() {
             maxWidth: '500px',
             width: '90%'
           }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>🔗 共有リンク</h2>
-            <p style={{ marginBottom: '16px', color: '#6b7280' }}>
-              このリンクを同盟メンバーと共有してください
-            </p>
-            <div style={{
-              background: '#f9fafb',
-              padding: '16px',
-              borderRadius: '8px',
-              marginBottom: '16px',
-              wordBreak: 'break-all',
-              fontFamily: 'monospace',
-              fontSize: '14px'
-            }}>
-              {typeof window !== 'undefined' ? window.location.href : ''}
-            </div>
-            <button
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('リンクをコピーしました！');
-                }
-              }}
-              style={{
-                width: '100%',
+            <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>🔗 共有情報</h2>
+            
+            {/* 閲覧用リンク */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1f2937' }}>
+                📖 閲覧用リンク
+              </h3>
+              <p style={{ marginBottom: '12px', color: '#6b7280', fontSize: '14px' }}>
+                マップを見るだけの場合はこのリンクを共有
+              </p>
+              <div style={{
+                background: '#f9fafb',
                 padding: '12px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
                 borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                marginBottom: '12px'
-              }}
-            >
-              📋 コピー
-            </button>
+                marginBottom: '12px',
+                wordBreak: 'break-all',
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                border: '1px solid #e5e7eb'
+              }}>
+                {typeof window !== 'undefined' ? `${window.location.origin}/map/${allianceId}` : ''}
+              </div>
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    navigator.clipboard.writeText(`${window.location.origin}/map/${allianceId}`);
+                    alert('閲覧用リンクをコピーしました！');
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  background: '#6366f1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                📋 閲覧用リンクをコピー
+              </button>
+            </div>
+
+            {/* 編集用パスワード */}
+            {alliance && alliance.editPassword && (
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1f2937' }}>
+                  🔑 編集用パスワード
+                </h3>
+                <p style={{ marginBottom: '12px', color: '#6b7280', fontSize: '14px' }}>
+                  マップを編集する人にはこのパスワードも伝えてください
+                </p>
+                <div style={{
+                  background: '#fef3c7',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  marginBottom: '12px',
+                  fontFamily: 'monospace',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  border: '2px solid #fbbf24',
+                  color: '#92400e'
+                }}>
+                  {alliance.editPassword}
+                </div>
+                <button
+                  onClick={() => {
+                    if (alliance.editPassword) {
+                      navigator.clipboard.writeText(alliance.editPassword);
+                      alert('編集用パスワードをコピーしました！');
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    background: '#f59e0b',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📋 パスワードをコピー
+                </button>
+              </div>
+            )}
+
+            {/* スプレッドシート直接リンク */}
+            {alliance && alliance.spreadsheetId && (
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1f2937' }}>
+                  📊 スプレッドシート
+                </h3>
+                <p style={{ marginBottom: '12px', color: '#6b7280', fontSize: '14px' }}>
+                  データを直接確認・編集するスプレッドシート
+                </p>
+                <div style={{
+                  background: '#f9fafb',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  marginBottom: '12px',
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  fontSize: '13px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  {`https://docs.google.com/spreadsheets/d/${alliance.spreadsheetId}/edit`}
+                </div>
+                <button
+                  onClick={() => {
+                    const url = `https://docs.google.com/spreadsheets/d/${alliance.spreadsheetId}/edit`;
+                    navigator.clipboard.writeText(url);
+                    alert('スプレッドシートのリンクをコピーしました！');
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    background: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    marginBottom: '8px'
+                  }}
+                >
+                  📋 スプレッドシートをコピー
+                </button>
+                <button
+                  onClick={() => {
+                    window.open(`https://docs.google.com/spreadsheets/d/${alliance.spreadsheetId}/edit`, '_blank');
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    background: '#059669',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🔗 スプレッドシートを開く
+                </button>
+              </div>
+            )}
+
             <button
               onClick={() => setShowShareModal(false)}
               style={{
