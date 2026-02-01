@@ -19,25 +19,79 @@ const MASTER_API_URL = process.env.NEXT_PUBLIC_MASTER_API_URL || '';
 export async function createAlliance(
   request: CreateAllianceRequest
 ): Promise<CreateAllianceResponse> {
-  try {
-    const response = await fetch(
-      `${MASTER_API_URL}?action=createAlliance`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      }
-    );
+  // 環境変数チェック
+  if (!MASTER_API_URL) {
+    console.error('NEXT_PUBLIC_MASTER_API_URL is not set');
+    return {
+      ok: false,
+      error: 'API URLが設定されていません。開発サーバーを再起動してください。',
+    };
+  }
 
-    const data = await response.json();
+  console.log('Creating alliance with URL:', MASTER_API_URL);
+  console.log('Request data:', request);
+
+  try {
+    // GASのCORS制限を回避するため、GETリクエストでデータを送信
+    const params = new URLSearchParams({
+      action: 'createAlliance',
+      allianceName: request.allianceName,
+      serverNumber: request.serverNumber,
+      editPassword: request.editPassword,
+      userId: request.userId,
+    });
+
+    const url = `${MASTER_API_URL}?${params.toString()}`;
+    console.log('Request URL:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      console.error('HTTP error:', response.status, response.statusText);
+      
+      const responseText = await response.text();
+      console.error('Response body:', responseText);
+      
+      return {
+        ok: false,
+        error: `サーバーエラー: ${response.status} ${response.statusText}`,
+      };
+    }
+
+    const responseText = await response.text();
+    console.log('Response text:', responseText);
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log('Alliance created:', data);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Response was not valid JSON:', responseText.substring(0, 500));
+      return {
+        ok: false,
+        error: 'サーバーから無効なレスポンスが返されました。GASのデプロイURLを確認してください。',
+      };
+    }
+
     return data;
   } catch (error) {
     console.error('Error creating alliance:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        ok: false,
+        error: 'ネットワークエラー: APIに接続できません。インターネット接続を確認してください。',
+      };
+    }
     return {
       ok: false,
-      error: 'ネットワークエラーが発生しました',
+      error: `同盟の作成に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`,
     };
   }
 }

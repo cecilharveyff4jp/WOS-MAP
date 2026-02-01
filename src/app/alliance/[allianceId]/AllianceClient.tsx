@@ -140,20 +140,18 @@ export default function AllianceClient() {
   const handleDelete = async () => {
     if (!alliance) return;
     
-    if (deleteConfirmText !== alliance.allianceName) {
+    if (deleteConfirmText.trim() !== String(alliance.allianceName).trim()) {
       alert('同盟名が一致しません');
       return;
     }
     
-    // Google認証済みで所有者の場合はパスワード不要、それ以外はパスワード必須
-    const isOwner = user && user.userId === alliance.userId;
-    if (!isOwner && !deletePassword) {
+    if (!deletePassword.trim()) {
       alert('パスワードを入力してください');
       return;
     }
 
     try {
-      const result = await deleteAlliance(allianceId, isOwner ? 'google-auth' : deletePassword);
+      const result = await deleteAlliance(allianceId, deletePassword.trim());
       
       if (result.ok) {
         alert('同盟を削除しました');
@@ -179,9 +177,110 @@ export default function AllianceClient() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        <div style={{ color: 'white', fontSize: '18px' }}>読み込み中...</div>
+        {/* 背景エフェクト */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 30% 40%, rgba(147, 197, 253, 0.3) 0%, transparent 60%), radial-gradient(circle at 70% 60%, rgba(186, 230, 253, 0.2) 0%, transparent 50%)',
+          animation: 'glacierPulse 3s ease-in-out infinite',
+        }} />
+        
+        {/* ローディングコンテナ */}
+        <div style={{
+          position: 'relative',
+          zIndex: 1,
+          textAlign: 'center',
+        }}>
+          {/* 氷河アニメーション - 回転する雪の結晶 */}
+          <div style={{
+            fontSize: '64px',
+            marginBottom: '24px',
+            animation: 'glacierSpin 3s linear infinite',
+            filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.6))',
+          }}>
+            ❄️
+          </div>
+          
+          {/* ローディングテキスト */}
+          <div style={{
+            color: '#0c4a6e',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            marginBottom: '16px',
+            textShadow: '0 2px 8px rgba(255, 255, 255, 0.8)',
+            animation: 'glacierFade 2s ease-in-out infinite',
+          }}>
+            読み込み中
+          </div>
+          
+          {/* ローディングバー */}
+          <div style={{
+            width: '200px',
+            height: '4px',
+            background: 'rgba(255, 255, 255, 0.3)',
+            borderRadius: '2px',
+            overflow: 'hidden',
+            margin: '0 auto',
+            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+          }}>
+            <div style={{
+              height: '100%',
+              background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%)',
+              animation: 'glacierSlide 1.5s ease-in-out infinite',
+              borderRadius: '2px',
+              boxShadow: '0 0 10px rgba(59, 130, 246, 0.8)',
+            }} />
+          </div>
+        </div>
+        
+        {/* CSS アニメーション */}
+        <style jsx>{`
+          @keyframes glacierSpin {
+            0% {
+              transform: rotate(0deg) scale(1);
+            }
+            50% {
+              transform: rotate(180deg) scale(1.1);
+            }
+            100% {
+              transform: rotate(360deg) scale(1);
+            }
+          }
+          
+          @keyframes glacierFade {
+            0%, 100% {
+              opacity: 0.7;
+            }
+            50% {
+              opacity: 1;
+            }
+          }
+          
+          @keyframes glacierSlide {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(300%);
+            }
+          }
+          
+          @keyframes glacierPulse {
+            0%, 100% {
+              opacity: 0.6;
+            }
+            50% {
+              opacity: 1;
+            }
+          }
+        `}</style>
       </div>
     );
   }
@@ -193,37 +292,75 @@ export default function AllianceClient() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {/* 背景エフェクト */}
         <div style={{
-          background: 'white',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 30% 40%, rgba(147, 197, 253, 0.2) 0%, transparent 60%)',
+        }} />
+        
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.95) 100%)',
           padding: '32px',
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(59, 130, 246, 0.2), 0 0 20px rgba(147, 197, 253, 0.3)',
+          border: '2px solid rgba(147, 197, 253, 0.4)',
           maxWidth: '400px',
           width: '90%',
-          textAlign: 'center'
+          textAlign: 'center',
+          position: 'relative',
+          zIndex: 1,
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
-          <h1 style={{ fontSize: '24px', marginBottom: '16px', color: '#1f2937' }}>
+          <div style={{ 
+            fontSize: '48px', 
+            marginBottom: '16px',
+            filter: 'drop-shadow(0 4px 8px rgba(239, 68, 68, 0.3))',
+          }}>❌</div>
+          <h1 style={{ 
+            fontSize: '24px', 
+            marginBottom: '16px', 
+            color: '#0c4a6e',
+            fontWeight: 'bold',
+          }}>
             エラー
           </h1>
-          <p style={{ color: '#6b7280', marginBottom: '24px' }}>{error}</p>
+          <p style={{ 
+            color: '#0369a1', 
+            marginBottom: '24px',
+            lineHeight: '1.6',
+          }}>{error}</p>
           <button
             onClick={() => router.push('/dashboard')}
             style={{
               width: '100%',
-              padding: '12px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '14px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
               fontWeight: '600',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.5)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
             }}
           >
-            ダッシュボードに戻る
+            ❄️ ダッシュボードに戻る
           </button>
         </div>
       </div>
@@ -233,27 +370,64 @@ export default function AllianceClient() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '24px'
+      background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)',
+      padding: '24px',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
+      {/* 背景の氷河エフェクト */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 30%, rgba(147, 197, 253, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(186, 230, 253, 0.15) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }} />
+      
       <div style={{
         maxWidth: '800px',
         margin: '0 auto',
-        background: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.95) 100%)',
+        borderRadius: '16px',
+        boxShadow: '0 10px 40px rgba(59, 130, 246, 0.2), 0 0 20px rgba(147, 197, 253, 0.3)',
+        border: '2px solid rgba(147, 197, 253, 0.4)',
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1,
       }}>
         {/* ヘッダー */}
         <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2c5364 50%, #3a6073 100%)',
           padding: '32px',
-          color: 'white'
+          color: 'white',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
-          <h1 style={{ fontSize: '28px', marginBottom: '8px' }}>
-            {alliance.allianceName}
+          {/* 氷河エフェクト */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at 30% 40%, rgba(100, 200, 255, 0.15) 0%, transparent 60%)',
+            pointerEvents: 'none',
+          }} />
+          <h1 style={{ 
+            fontSize: '28px', 
+            marginBottom: '8px',
+            position: 'relative',
+            textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+          }}>
+            🏰 {alliance.allianceName}
           </h1>
-          <p style={{ opacity: 0.9 }}>サーバー: {alliance.serverNumber}</p>
+          <p style={{ 
+            opacity: 0.9,
+            position: 'relative',
+            textShadow: '0 1px 4px rgba(0, 0, 0, 0.2)',
+          }}>サーバー: {alliance.serverNumber}</p>
         </div>
 
         {/* コンテンツ */}
@@ -645,20 +819,30 @@ export default function AllianceClient() {
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(15, 32, 39, 0.7)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }} onClick={() => setShowDeleteModal(false)}>
           <div style={{
-            background: 'white',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 240, 240, 0.98) 100%)',
             padding: '32px',
-            borderRadius: '12px',
+            borderRadius: '16px',
             maxWidth: '500px',
-            width: '90%'
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(239, 68, 68, 0.3)',
+            border: '2px solid rgba(239, 68, 68, 0.3)',
           }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ fontSize: '24px', marginBottom: '16px', color: '#ef4444' }}>
+            <h2 style={{ 
+              fontSize: '24px', 
+              marginBottom: '16px', 
+              background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
               ⚠️ 同盟の削除
             </h2>
             <p style={{ marginBottom: '24px', color: '#6b7280' }}>
@@ -671,52 +855,83 @@ export default function AllianceClient() {
               <input
                 type="text"
                 value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder={alliance.allianceName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setDeleteConfirmText(value);
+                  console.log('入力された同盟名:', value);
+                  console.log('実際の同盟名:', alliance.allianceName);
+                  console.log('一致:', value.trim() === String(alliance.allianceName).trim());
+                }}
+                placeholder={String(alliance.allianceName)}
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '2px solid #e5e7eb',
+                  border: '2px solid rgba(239, 68, 68, 0.3)',
                   borderRadius: '8px',
                   fontSize: '16px',
-                  marginBottom: '16px'
+                  marginBottom: '16px',
+                  transition: 'border-color 0.2s',
                 }}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'}
               />
-              {!(user && alliance && user.userId === alliance.userId) && (
-                <>
-                  <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
-                    パスワード
-                  </label>
-                  <input
-                    type="password"
-                    value={deletePassword}
-                    onChange={(e) => setDeletePassword(e.target.value)}
-                    placeholder="編集用パスワード"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '16px'
-                    }}
-                  />
-                </>
-              )}
+              <label style={{ display: 'block', marginBottom: '8px', color: '#1f2937', fontWeight: '500' }}>
+                パスワード
+              </label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setDeletePassword(value);
+                  console.log('パスワード入力:', value ? '***' : '(空)');
+                  console.log('パスワード長さ:', value.length);
+                }}
+                placeholder="編集用パスワード"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '2px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'}
+              />
+              {/* デバッグ情報 */}
+              <div style={{ marginTop: '12px', padding: '8px', background: '#f3f4f6', borderRadius: '4px', fontSize: '12px', fontFamily: 'monospace' }}>
+                <div>入力された同盟名: "{deleteConfirmText}" (trim: "{deleteConfirmText.trim()}")</div>
+                <div>実際の同盟名: "{alliance.allianceName}" (trim: "{String(alliance.allianceName).trim()}")</div>
+                <div>同盟名一致: {deleteConfirmText.trim() === String(alliance.allianceName).trim() ? '✓' : '✗'}</div>
+                <div>パスワード入力: {deletePassword.trim() ? '✓' : '✗'} ({deletePassword.length}文字)</div>
+                <div style={{ color: (deleteConfirmText.trim() === String(alliance.allianceName).trim() && deletePassword.trim()) ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>
+                  ボタン状態: {(deleteConfirmText.trim() === String(alliance.allianceName).trim() && deletePassword.trim()) ? '有効' : '無効'}
+                </div>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={handleDelete}
-                disabled={deleteConfirmText !== alliance.allianceName || (!(user && user.userId === alliance.userId) && !deletePassword)}
+                disabled={
+                  deleteConfirmText.trim() !== String(alliance.allianceName).trim() || !deletePassword.trim()
+                }
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: (deleteConfirmText === alliance.allianceName && ((user && user.userId === alliance.userId) || deletePassword)) ? '#ef4444' : '#e5e7eb',
-                  color: (deleteConfirmText === alliance.allianceName && ((user && user.userId === alliance.userId) || deletePassword)) ? 'white' : '#9ca3af',
+                  background: (deleteConfirmText.trim() === String(alliance.allianceName).trim() && deletePassword.trim()) 
+                    ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)' 
+                    : '#e5e7eb',
+                  color: (deleteConfirmText.trim() === String(alliance.allianceName).trim() && deletePassword.trim()) ? 'white' : '#9ca3af',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  cursor: (deleteConfirmText === alliance.allianceName && ((user && user.userId === alliance.userId) || deletePassword)) ? 'pointer' : 'not-allowed'
+                  cursor: (deleteConfirmText.trim() === String(alliance.allianceName).trim() && deletePassword.trim()) ? 'pointer' : 'not-allowed',
+                  boxShadow: (deleteConfirmText.trim() === String(alliance.allianceName).trim() && deletePassword.trim()) 
+                    ? '0 4px 12px rgba(239, 68, 68, 0.4)' 
+                    : 'none',
+                  transition: 'all 0.2s',
                 }}
               >
                 削除する
@@ -730,13 +945,14 @@ export default function AllianceClient() {
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: '#e5e7eb',
+                  background: 'rgba(229, 231, 235, 0.9)',
                   color: '#1f2937',
-                  border: 'none',
+                  border: '2px solid rgba(150, 220, 255, 0.3)',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
               >
                 キャンセル
@@ -755,16 +971,21 @@ export default function AllianceClient() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '16px'
         }} onClick={() => setShowShareModal(false)}>
           <div style={{
-            background: 'white',
+            background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)',
             padding: '32px',
             borderRadius: '12px',
             maxWidth: '500px',
-            width: '90%'
+            width: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)',
+            border: '1px solid rgba(147, 197, 253, 0.5)'
           }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>🔗 共有情報</h2>
+            <h2 style={{ fontSize: '24px', marginBottom: '16px', color: '#0c4a6e' }}>❄️ 共有情報</h2>
             
             {/* 閲覧用リンク */}
             <div style={{ marginBottom: '24px' }}>

@@ -75,14 +75,24 @@ export default function NewAlliancePage() {
     setIsSubmitting(true);
 
     try {
-      const alliance = await createAlliance({
+      console.log('同盟作成リクエスト:', formData);
+      const response = await createAlliance({
         allianceName: formData.allianceName.trim(),
         serverNumber: formData.serverNumber.trim(),
         editPassword: formData.editPassword.trim(),
         userId: user.userId,
       });
 
-      router.push(`/map/${alliance.allianceId}`);
+      console.log('同盟作成レスポンス:', response);
+
+      if (!response.ok) {
+        setError(response.error || '同盟の作成に失敗しました');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 同盟作成成功後、ダッシュボードに戻る
+      router.push('/dashboard');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -104,9 +114,13 @@ export default function NewAlliancePage() {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
       }}>
-        <div style={{ color: 'white', fontSize: isMobile ? '16px' : '18px' }}>読み込み中...</div>
+        <div style={{ 
+          color: 'rgba(200, 230, 255, 0.9)', 
+          fontSize: isMobile ? '16px' : '18px',
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+        }}>読み込み中...</div>
       </div>
     );
   }
@@ -116,29 +130,47 @@ export default function NewAlliancePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
       padding: isMobile ? '16px' : '20px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
-      <div style={{ maxWidth: '600px', width: '100%' }}>
+      {/* 雪の結晶背景エフェクト */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(100, 200, 255, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(150, 220, 255, 0.06) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }} />
+      
+      <div style={{ maxWidth: '600px', width: '100%', position: 'relative', zIndex: 1 }}>
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: isMobile ? '12px' : '16px',
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%)',
+          borderRadius: isMobile ? '12px' : '20px',
           padding: isMobile ? '24px' : '40px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(100, 200, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+          border: '1px solid rgba(150, 220, 255, 0.3)',
+          backdropFilter: 'blur(10px)',
         }}>
           <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
             <h1 style={{ 
               fontSize: isMobile ? '22px' : '28px', 
               fontWeight: 'bold', 
               marginBottom: '8px',
-              color: '#333',
+              background: 'linear-gradient(135deg, #1e3a5f 0%, #2c5364 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
             }}>
-              🏰 新しい同盟を作成
+              🏔️ 新しい同盟を作成
             </h1>
-            <p style={{ fontSize: isMobile ? '13px' : '14px', color: '#666', margin: 0 }}>
+            <p style={{ fontSize: isMobile ? '13px' : '14px', color: '#2c5364', margin: 0, fontWeight: 500 }}>
               同盟情報を入力してマップを作成しましょう
             </p>
           </div>
@@ -146,13 +178,14 @@ export default function NewAlliancePage() {
           {error && (
             <div style={{
               padding: isMobile ? '12px' : '16px',
-              backgroundColor: '#ffebee',
-              border: '1px solid #f44336',
-              borderRadius: '8px',
+              background: 'linear-gradient(135deg, rgba(255, 235, 238, 0.95) 0%, rgba(255, 220, 225, 0.95) 100%)',
+              border: '2px solid #f44336',
+              borderRadius: '12px',
               color: '#c62828',
               marginBottom: isMobile ? '20px' : '24px',
               fontSize: isMobile ? '13px' : '14px',
               lineHeight: 1.5,
+              boxShadow: '0 4px 12px rgba(244, 67, 54, 0.15)',
             }}>
               ⚠️ {error}
             </div>
@@ -166,7 +199,7 @@ export default function NewAlliancePage() {
                 fontSize: isMobile ? '13px' : '14px',
                 fontWeight: 'bold',
                 marginBottom: '8px',
-                color: '#333',
+                color: '#1e3a5f',
               }}>
                 同盟名 <span style={{ color: '#f44336' }}>*</span>
               </label>
@@ -189,12 +222,14 @@ export default function NewAlliancePage() {
                 }}
                 onFocus={(e) => {
                   if (!errors.allianceName) {
-                    e.target.style.borderColor = '#667eea';
+                    e.target.style.borderColor = '#4a90e2';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(74, 144, 226, 0.1)';
                   }
                 }}
                 onBlur={(e) => {
                   if (!errors.allianceName) {
                     e.target.style.borderColor = '#ddd';
+                    e.target.style.boxShadow = 'none';
                   }
                 }}
               />
@@ -212,7 +247,7 @@ export default function NewAlliancePage() {
                 fontSize: isMobile ? '13px' : '14px',
                 fontWeight: 'bold',
                 marginBottom: '8px',
-                color: '#333',
+                color: '#1e3a5f',
               }}>
                 サーバー番号 <span style={{ color: '#f44336' }}>*</span>
               </label>
@@ -231,18 +266,20 @@ export default function NewAlliancePage() {
                   border: errors.serverNumber ? '2px solid #f44336' : '1px solid #ddd',
                   borderRadius: '8px',
                   outline: 'none',
-                  transition: 'border-color 0.2s',
+                  transition: 'all 0.2s',
                   backgroundColor: isSubmitting ? '#f5f5f5' : 'white',
                   minHeight: '44px',
                 }}
                 onFocus={(e) => {
                   if (!errors.serverNumber) {
-                    e.target.style.borderColor = '#667eea';
+                    e.target.style.borderColor = '#4a90e2';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(74, 144, 226, 0.1)';
                   }
                 }}
                 onBlur={(e) => {
                   if (!errors.serverNumber) {
                     e.target.style.borderColor = '#ddd';
+                    e.target.style.boxShadow = 'none';
                   }
                 }}
               />
@@ -351,23 +388,24 @@ export default function NewAlliancePage() {
                   fontWeight: 'bold',
                   border: 'none',
                   borderRadius: '8px',
-                  backgroundColor: isSubmitting ? '#ccc' : '#667eea',
+                  background: isSubmitting ? 'linear-gradient(135deg, #ccc 0%, #aaa 100%)' : 'linear-gradient(135deg, #4a90e2 0%, #63b3ed 100%)',
                   color: 'white',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s',
                   minHeight: '48px',
                   order: isMobile ? 1 : 2,
+                  boxShadow: isSubmitting ? 'none' : '0 4px 12px rgba(74, 144, 226, 0.3)',
                 }}
                 onMouseOver={(e) => {
                   if (!isSubmitting && !isMobile) {
-                    e.currentTarget.style.backgroundColor = '#5568d3';
                     e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(74, 144, 226, 0.4)';
                   }
                 }}
                 onMouseOut={(e) => {
                   if (!isSubmitting && !isMobile) {
-                    e.currentTarget.style.backgroundColor = '#667eea';
                     e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.3)';
                   }
                 }}
               >

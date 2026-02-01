@@ -1663,6 +1663,8 @@ export default function MapViewerPage() {
       fontFamily: "system-ui", 
       position: "relative",
       paddingTop: tickerHidden ? 12 : 44, // テロップ表示時は上部にスペースを確保
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 25%, #dbeafe 50%, #bfdbfe 75%, #93c5fd 100%)",
     }}>
       {/* ヘッダー */}
       <div style={{ display: "flex", gap: isMobile ? 6 : 10, alignItems: "center", position: "relative" }}>
@@ -1671,7 +1673,7 @@ export default function MapViewerPage() {
           onClick={() => setShowHeaderMenu(!showHeaderMenu)}
           style={{
             padding: "8px 12px",
-            background: showHeaderMenu ? "#374151" : "#1f2937",
+            background: showHeaderMenu ? "linear-gradient(135deg, #2c5364 0%, #1e3a5f 100%)" : "linear-gradient(135deg, #4a90e2 0%, #2c5364 100%)",
             color: "white",
             border: "none",
             borderRadius: 6,
@@ -1679,10 +1681,11 @@ export default function MapViewerPage() {
             fontSize: "18px",
             transition: "all 0.2s",
             flexShrink: 0,
+            boxShadow: "0 2px 8px rgba(74, 144, 226, 0.3)",
           }}
           title="メニュー"
         >
-          ☰
+          ❄️
         </button>
         
         <h1 style={{ 
@@ -1874,7 +1877,8 @@ export default function MapViewerPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: "rgba(15, 32, 39, 0.7)",
+            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1884,16 +1888,17 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
-              padding: "24px",
-              borderRadius: 12,
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
+              padding: "32px",
+              borderRadius: 16,
               minWidth: 320,
-              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ margin: "0 0 16px 0" }}>編集モード認証</h2>
-            <p style={{ margin: "0 0 12px 0", fontSize: 14, color: "#374151" }}>
+            <h2 style={{ margin: "0 0 16px 0", color: "#0c4a6e", fontSize: 20, fontWeight: 600 }}>❄️ 編集モード認証</h2>
+            <p style={{ margin: "0 0 12px 0", fontSize: 14, color: "#0c4a6e" }}>
               パスワードを入力してください
             </p>
             <input
@@ -1904,24 +1909,30 @@ export default function MapViewerPage() {
               placeholder="パスワード"
               style={{
                 width: "100%",
-                padding: "10px",
-                border: "1px solid #ddd",
-                borderRadius: 6,
+                padding: "12px",
+                border: "2px solid rgba(147, 197, 253, 0.5)",
+                borderRadius: 8,
                 fontSize: 14,
                 boxSizing: "border-box",
+                transition: "border-color 0.2s",
+                background: "rgba(255, 255, 255, 0.9)",
               }}
+              onFocus={(e) => e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.8)"}
+              onBlur={(e) => e.currentTarget.style.borderColor = "rgba(147, 197, 253, 0.5)"}
               autoFocus
             />
-            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
               <button
                 onClick={() => setShowPasswordModal(false)}
                 style={{
                   flex: 1,
-                  padding: "10px",
-                  border: "1px solid #ddd",
-                  borderRadius: 6,
-                  background: "white",
+                  padding: "12px",
+                  border: "2px solid rgba(147, 197, 253, 0.5)",
+                  borderRadius: 8,
+                  background: "rgba(224, 242, 254, 0.5)",
+                  color: "#0c4a6e",
                   cursor: "pointer",
+                  fontWeight: "600",
                 }}
               >
                 キャンセル
@@ -1930,12 +1941,14 @@ export default function MapViewerPage() {
                 onClick={handlePasswordSubmit}
                 style={{
                   flex: 1,
-                  padding: "10px",
-                  background: "#2563eb",
+                  padding: "12px",
+                  background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
                   color: "white",
                   border: "none",
-                  borderRadius: 6,
+                  borderRadius: 8,
                   cursor: "pointer",
+                  fontWeight: "600",
+                  boxShadow: "0 4px 12px rgba(2, 132, 199, 0.4)",
                 }}
               >
                 ログイン
@@ -1953,12 +1966,13 @@ export default function MapViewerPage() {
             position: "absolute",
             top: "60px",
             left: "12px",
-            background: "white",
-            borderRadius: 8,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            background: "linear-gradient(135deg, rgba(224, 242, 254, 0.98) 0%, rgba(186, 230, 253, 0.98) 50%, rgba(147, 197, 253, 0.98) 100%)",
+            borderRadius: 12,
+            boxShadow: "0 8px 24px rgba(59, 130, 246, 0.3), 0 0 20px rgba(96, 165, 250, 0.4)",
             minWidth: 280,
             zIndex: 200,
             overflow: "hidden",
+            border: "1px solid rgba(147, 197, 253, 0.5)",
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -2362,7 +2376,8 @@ export default function MapViewerPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: "rgba(15, 32, 39, 0.7)",
+            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -2373,17 +2388,19 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
-              borderRadius: 12,
-              padding: "24px",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
+              borderRadius: 16,
+              padding: "32px",
               maxWidth: "600px",
               width: "100%",
               maxHeight: "80vh",
               overflow: "auto",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ margin: "0 0 20px 0", fontSize: "20px", fontWeight: 600 }}>マップ管理</h2>
+            <h2 style={{ margin: "0 0 20px 0", fontSize: "20px", fontWeight: 700, color: "#0c4a6e" }}>❄️ マップ管理</h2>
             
             <div style={{ marginBottom: "20px" }}>
               {mapConfigs.map((map, index) => (
@@ -2574,7 +2591,8 @@ export default function MapViewerPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: "rgba(15, 32, 39, 0.7)",
+            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -2590,14 +2608,15 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
               padding: "0",
               borderRadius: 16,
               width: "100%",
               maxWidth: isMobile ? "min(calc(100vw - 32px), 460px)" : "480px",
               minWidth: isMobile ? "auto" : "280px",
               maxHeight: isMobile ? "calc(100vh - 24px)" : "90vh",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
@@ -2606,12 +2625,13 @@ export default function MapViewerPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{
-              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              background: "linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%)",
               padding: isMobile ? "12px 16px" : "18px 24px",
-              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
               flexShrink: 0,
+              boxShadow: "0 4px 12px rgba(2, 132, 199, 0.3)",
             }}>
-              <h2 style={{ margin: 0, color: "white", fontSize: isMobile ? 17 : 20, fontWeight: 600, userSelect: "none" }}>オブジェクト編集</h2>
+              <h2 style={{ margin: 0, color: "white", fontSize: isMobile ? 17 : 20, fontWeight: 600, userSelect: "none", textShadow: "0 2px 8px rgba(0, 0, 0, 0.3)" }}>❄️ オブジェクト編集</h2>
             </div>
             <div style={{ padding: isMobile ? "14px" : "20px", overflowY: "auto", flex: 1 }}>
             
@@ -3950,25 +3970,27 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
               borderRadius: 16,
               width: "100%",
               maxWidth: isMobile ? "min(calc(100vw - 32px), 460px)" : "520px",
               maxHeight: isMobile ? "calc(100vh - 24px)" : "90vh",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{
-              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
               padding: isMobile ? "12px 16px" : "18px 24px",
-              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              borderBottom: "1px solid rgba(255,255,255,0.2)",
+              boxShadow: "0 4px 12px rgba(2, 132, 199, 0.3)",
             }}>
               <h2 style={{ margin: 0, color: "white", fontSize: isMobile ? 17 : 20, fontWeight: 600, userSelect: "none" }}>
-                🗺️ マップ管理
+                ❄️ マップ管理
               </h2>
             </div>
             <div style={{ padding: isMobile ? "14px" : "20px", overflowY: "auto", flex: 1 }}>
@@ -4120,25 +4142,27 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
               borderRadius: 16,
               width: "100%",
               maxWidth: "520px",
               maxHeight: "90vh",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.4), 0 0 32px rgba(96, 165, 250, 0.3)",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{
-              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              background: "linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%)",
               padding: "18px 24px",
-              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              borderBottom: "1px solid rgba(255,255,255,0.2)",
+              boxShadow: "0 4px 12px rgba(2, 132, 199, 0.3)",
             }}>
               <h2 style={{ margin: 0, color: "white", fontSize: 20, fontWeight: 600, userSelect: "none" }}>
-                🗺️ マップ管理
+                ❄️ マップ管理
               </h2>
             </div>
             <div style={{ padding: "20px", overflowY: "auto", flex: 1 }}>
@@ -4440,14 +4464,15 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
               borderRadius: 12,
               padding: isMobile ? "20px" : "28px",
               maxWidth: 500,
               width: "100%",
               maxHeight: "90vh",
               overflowY: "auto",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+              boxShadow: "0 8px 32px rgba(59, 130, 246, 0.4), 0 0 24px rgba(96, 165, 250, 0.3)",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -4455,10 +4480,10 @@ export default function MapViewerPage() {
               margin: "0 0 20px 0", 
               fontSize: isMobile ? 18 : 20, 
               fontWeight: 700,
-              color: "#1f2937",
+              color: "#0c4a6e",
               userSelect: "none",
             }}>
-              {editingLink ? "リンク編集" : "リンク追加"}
+              ❄️ {editingLink ? "リンク編集" : "リンク追加"}
             </h2>
 
             <div style={{ marginBottom: 16 }}>
@@ -4617,18 +4642,25 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
               borderRadius: 12,
               padding: isMobile ? "16px" : "24px",
               width: isMobile ? "90%" : "500px",
               maxHeight: "80vh",
               overflow: "auto",
-              position: "relative",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: isMobile ? 18 : 20 }}>
-              📍 マイオブジェクト設定
+            <h2 style={{ 
+              margin: "0 0 16px 0", 
+              fontSize: isMobile ? 18 : 20, 
+              fontWeight: 700,
+              color: "#0c4a6e",
+              userSelect: "none",
+            }}>
+              ❄️ マイオブジェクト設定
             </h2>
 
             {/* 検索ボックス */}
@@ -4822,7 +4854,7 @@ export default function MapViewerPage() {
         >
           <div
             style={{
-              background: "white",
+              background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
               borderRadius: 16,
               padding: isMobile ? 20 : 30,
               maxWidth: 450,
@@ -4830,7 +4862,8 @@ export default function MapViewerPage() {
               maxHeight: "80vh",
               overflowY: "auto",
               position: "relative",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              boxShadow: "0 20px 60px rgba(59, 130, 246, 0.5), 0 0 40px rgba(96, 165, 250, 0.4)",
+              border: "1px solid rgba(147, 197, 253, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -4844,9 +4877,10 @@ export default function MapViewerPage() {
                 border: "none",
                 fontSize: 24,
                 cursor: "pointer",
-                color: "#9ca3af",
+                color: "#0c4a6e",
                 padding: 5,
                 lineHeight: 1,
+                opacity: 0.6,
               }}
             >
               ✕
@@ -4856,10 +4890,10 @@ export default function MapViewerPage() {
               margin: "0 0 20px 0", 
               fontSize: isMobile ? 20 : 22, 
               fontWeight: 600,
-              color: "#1f2937",
+              color: "#0c4a6e",
               userSelect: "none",
             }}>
-              集計
+              ❄️ 集計
             </h2>
             
             {(() => {
